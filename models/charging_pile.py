@@ -2,8 +2,9 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 from collections import deque
-from utils.enums import WorkState, ChargeMode
+from utils.enums import WorkState, ChargeMode, CarState
 from models.car import ChargingRequest
+from models.bill import ChargingSession
 
 @dataclass
 class ChargingPile:

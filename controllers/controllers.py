@@ -3,6 +3,7 @@ from services.user_service import UserService
 from services.charging_service import ChargingService
 from services.scheduling_service import SchedulingService
 from repositories.repositories import PileRepository, QueueRepository
+from utils.enums import ChargeMode
 
 class UserController:
     def __init__(self, user_service: UserService):

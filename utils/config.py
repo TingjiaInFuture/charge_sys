@@ -1,4 +1,5 @@
 # utils/config.py
+from utils.enums import ChargeMode
 
 # Pricing per kWh
 PRICE_PER_KWH = {
