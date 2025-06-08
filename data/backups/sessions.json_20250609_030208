@@ -103,5 +103,12 @@
     "pile_id": "F02",
     "start_time": "2025-06-08T23:45:46.740924",
     "request_amount_kwh": 1.0
+  },
+  "3b4d9e95-c74a-48b5-8835-5db8e147f314": {
+    "session_id": "3b4d9e95-c74a-48b5-8835-5db8e147f314",
+    "car_id": "BUPT11",
+    "pile_id": "T01",
+    "start_time": "2025-06-09T03:00:00.920842",
+    "request_amount_kwh": 40.0
   }
 }

@@ -372,7 +372,7 @@ class ChargeServer:
             print(f"[Server] 正在获取车辆 {car_id} 的充电详情...")
 
             # 获取当前充电请求
-            current_request = self.request_repo.find_by_id(car_id)
+            current_request = self.request_repo.get(car_id)
             print(f"[Server] 当前充电请求: {current_request.to_dict() if current_request else None}")
 
             # 获取当前充电会话

@@ -10,7 +10,8 @@
     "total_charged_kwh": 0.0,
     "total_charging_time": 0.0,
     "total_charging_count": 0,
-    "total_income": 0.0
+    "total_income": 0.0,
+    "pile_class": "FastChargingPile"
   },
   "F02": {
     "pile_id": "F02",

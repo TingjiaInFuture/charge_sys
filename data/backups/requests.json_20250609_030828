@@ -10,12 +10,12 @@
   },
   "BUPT11": {
     "car_id": "BUPT11",
-    "request_mode": "快充",
+    "request_mode": "慢充",
     "request_amount_kwh": 40.0,
-    "request_time": "2025-06-09T03:10:25.207047",
-    "state": "充电完成",
-    "pile_id": "F01",
-    "queue_number": "F001"
+    "request_time": "2025-06-09T03:06:45.405661",
+    "state": "充电中",
+    "pile_id": "T01",
+    "queue_number": "T001"
   },
   "BUPT12": {
     "car_id": "BUPT12",

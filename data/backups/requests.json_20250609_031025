@@ -13,9 +13,9 @@
     "request_mode": "快充",
     "request_amount_kwh": 40.0,
     "request_time": "2025-06-09T03:10:25.207047",
-    "state": "充电完成",
-    "pile_id": "F01",
-    "queue_number": "F001"
+    "state": "在主队列等待",
+    "pile_id": null,
+    "queue_number": null
   },
   "BUPT12": {
     "car_id": "BUPT12",

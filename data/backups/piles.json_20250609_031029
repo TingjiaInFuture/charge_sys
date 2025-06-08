@@ -3,7 +3,7 @@
     "pile_id": "F01",
     "pile_type": "快充",
     "power_kw": 30.0,
-    "state": "空闲",
+    "state": "充电中",
     "current_car_id": null,
     "start_time": null,
     "charged_kwh": 0.0,

@@ -95,12 +95,14 @@ class ChargingService:
             return None
 
         # 获取充电桩
-        pile = self._pile_repo.find_by_id(current_session.pile_id)
+        pile = self._pile_repo.get(current_session.pile_id)
         if not pile:
             print(f"[ChargingService] Error: Pile {current_session.pile_id} not found")
             return None
 
         print(f"[ChargingService] Ending charge for Car {car_id} at Pile {pile.pile_id}")
+        print(f"[ChargingService] Current pile state: {pile.state.value}")
+        print(f"[ChargingService] Current pile charged_kwh: {pile.charged_kwh}")
 
         # 计算账单
         bill = self._billing_service.calculate_and_create_bill(current_session, pile, datetime.now())
@@ -108,26 +110,27 @@ class ChargingService:
         print(f"[ChargingService] Created bill for Car {car_id}")
         
         # 更新请求状态
-        request = self._request_repo.find_by_id(car_id)
+        request = self._request_repo.get(car_id)
         if request:
-            request.state = CarState.CHARGING_COMPLETED  # 使用正确的状态名称
+            request.state = CarState.CHARGING_COMPLETED
             self._request_repo.save(request.car_id, request)
             print(f"[ChargingService] Updated request state to CHARGING_COMPLETED for Car {car_id}")
 
         # 更新充电桩状态
-        pile.end_charging(pile.charged_kwh, bill.total_amount)
+        pile.end_charging(pile.charged_kwh, bill.total_fee)
         self._pile_repo.save(pile.pile_id, pile)
-        print(f"[ChargingService] Updated pile state to IDLE for Pile {pile.pile_id}")
+        print(f"[ChargingService] Updated pile state to {pile.state.value} for Pile {pile.pile_id}")
+        print(f"[ChargingService] Pile charged_kwh after end_charging: {pile.charged_kwh}")
         
         # 删除会话
         self._session_repo.delete(current_session.session_id)
         print(f"[ChargingService] Deleted charging session for Car {car_id}")
         
-        print(f"[ChargingService] Charging completed for Car {car_id}. Total amount: {bill.total_amount}")
+        print(f"[ChargingService] Charging completed for Car {car_id}. Total amount: {bill.total_fee}")
         return bill
         
     def report_pile_failure(self, pile_id: str):
-        pile = self._pile_repo.find_by_id(pile_id)
+        pile = self._pile_repo.get(pile_id)
         if not pile: return
 
         print(f"[ChargingService] EMERGENCY: Pile {pile_id} reported a failure!")
@@ -139,7 +142,7 @@ class ChargingService:
             print(f"  -> Interrupting charge for Car {session.car_id}.")
             # A real system would calculate partial bill and re-queue the car
             # For simplicity, we just end the session without a full bill
-            interrupted_request = self._request_repo.find_by_id(session.car_id)
+            interrupted_request = self._request_repo.get(session.car_id)
             interrupted_request.state = CarState.WAITING_IN_MAIN_QUEUE
             self._queue_repo.add_to_front_of_queue(interrupted_request) # Re-add to front of the queue
             print(f"  -> Car {session.car_id} has been re-queued with priority.")
@@ -150,7 +153,7 @@ class ChargingService:
         self._pile_repo.save(pile.pile_id, pile)
 
     def recover_pile(self, pile_id: str):
-        pile = self._pile_repo.find_by_id(pile_id)
+        pile = self._pile_repo.get(pile_id)
         if pile and pile.state == WorkState.FAULTY:
             pile.state = WorkState.IDLE
             self._pile_repo.save(pile.pile_id, pile)

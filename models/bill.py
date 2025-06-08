@@ -46,3 +46,34 @@ class Bill:
     charge_fee: float
     service_fee: float
     total_fee: float
+
+    def to_dict(self) -> dict:
+        """将账单对象转换为字典"""
+        return {
+            'bill_id': self.bill_id,
+            'car_id': self.car_id,
+            'pile_id': self.pile_id,
+            'start_time': self.start_time.isoformat(),
+            'end_time': self.end_time.isoformat(),
+            'charged_kwh': self.charged_kwh,
+            'charge_mode': self.charge_mode.value,
+            'charge_fee': self.charge_fee,
+            'service_fee': self.service_fee,
+            'total_fee': self.total_fee
+        }
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> 'Bill':
+        """从字典创建账单对象"""
+        return cls(
+            bill_id=data['bill_id'],
+            car_id=data['car_id'],
+            pile_id=data['pile_id'],
+            start_time=datetime.fromisoformat(data['start_time']),
+            end_time=datetime.fromisoformat(data['end_time']),
+            charged_kwh=data['charged_kwh'],
+            charge_mode=ChargeMode(data['charge_mode']),
+            charge_fee=data['charge_fee'],
+            service_fee=data['service_fee'],
+            total_fee=data['total_fee']
+        )

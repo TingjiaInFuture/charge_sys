@@ -107,6 +107,9 @@ class UserClient(tk.Tk):
         
         ttk.Button(button_frame, text="提交充电请求", command=self.show_charging_request_frame).pack(side=tk.LEFT, padx=5)
         ttk.Button(button_frame, text="查看充电详单", command=self.show_charging_details).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="查看本车排队号码", command=self.show_queue_number).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="查看本充电模式下前车等待数量", command=self.show_waiting_count).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="结束充电", command=self.end_charging).pack(side=tk.LEFT, padx=5)
         ttk.Button(button_frame, text="退出登录", command=self.logout).pack(side=tk.LEFT, padx=5)
     
     def show_charging_request_frame(self):
@@ -342,6 +345,64 @@ class UserClient(tk.Tk):
         """析构函数"""
         if hasattr(self, 'network_client'):
             self.network_client.disconnect()
+
+    def show_queue_number(self):
+        """显示本车排队号码"""
+        try:
+            # 获取充电详情
+            response = self.network_client.get_charging_details(self.car_id)
+            if response and response.get('status') == 'success':
+                data = response.get('data', {})
+                current_request = data.get('current_request')
+                
+                if current_request and current_request.get('queue_number'):
+                    messagebox.showinfo("排队号码", f"您的排队号码是：{current_request['queue_number']}")
+                else:
+                    messagebox.showinfo("提示", "您当前没有排队中的充电请求")
+            else:
+                messagebox.showerror("错误", "获取排队号码失败")
+        except Exception as e:
+            messagebox.showerror("错误", f"获取排队号码失败: {str(e)}")
+
+    def show_waiting_count(self):
+        """显示本充电模式下前车等待数量"""
+        try:
+            # 获取充电详情
+            response = self.network_client.get_charging_details(self.car_id)
+            if response and response.get('status') == 'success':
+                data = response.get('data', {})
+                current_request = data.get('current_request')
+                
+                if current_request:
+                    # 获取所有充电桩
+                    piles = self.network_client.get_all_piles()
+                    waiting_count = 0
+                    
+                    # 统计同模式下等待的车辆数量
+                    for pile in piles:
+                        if pile['pile_type'] == current_request['request_mode']:
+                            queue_data = self.network_client.get_pile_queue(pile['pile_id'])
+                            waiting_count += len(queue_data)
+                    
+                    messagebox.showinfo("等待数量", f"当前充电模式下共有 {waiting_count} 辆车在等待")
+                else:
+                    messagebox.showinfo("提示", "您当前没有排队中的充电请求")
+            else:
+                messagebox.showerror("错误", "获取等待数量失败")
+        except Exception as e:
+            messagebox.showerror("错误", f"获取等待数量失败: {str(e)}")
+
+    def end_charging(self):
+        """结束充电"""
+        try:
+            if messagebox.askyesno("确认", "确定要结束当前充电吗？"):
+                if self.network_client.end_charging(self.car_id):
+                    messagebox.showinfo("成功", "充电已结束")
+                    self.show_main_menu()
+                else:
+                    messagebox.showerror("错误", "结束充电失败")
+        except Exception as e:
+            messagebox.showerror("错误", f"结束充电失败: {str(e)}")
 
 if __name__ == "__main__":
     app = UserClient()

@@ -1,0 +1,110 @@
+{
+  "2d2a9d4f-e4f9-4e07-88d8-fdaab937a399": {
+    "bill_id": "2d2a9d4f-e4f9-4e07-88d8-fdaab937a399",
+    "car_id": "BUPT11",
+    "pile_id": "F01",
+    "start_time": "2025-06-09T02:45:13.988071",
+    "end_time": "2025-06-09T02:57:11.508947",
+    "charged_kwh": 5.98,
+    "charge_mode": "快充",
+    "charge_fee": 7.18,
+    "service_fee": 2.0,
+    "total_fee": 9.18
+  },
+  "dab892dc-0a2a-4539-a67d-533a99774cf7": {
+    "bill_id": "dab892dc-0a2a-4539-a67d-533a99774cf7",
+    "car_id": "BUPT11",
+    "pile_id": "F01",
+    "start_time": "2025-06-09T02:45:13.988071",
+    "end_time": "2025-06-09T02:57:13.516728",
+    "charged_kwh": 6.0,
+    "charge_mode": "快充",
+    "charge_fee": 7.2,
+    "service_fee": 2.0,
+    "total_fee": 9.2
+  },
+  "ae13d9d5-4325-4085-b7d6-b9f332e53039": {
+    "bill_id": "ae13d9d5-4325-4085-b7d6-b9f332e53039",
+    "car_id": "BUPT11",
+    "pile_id": "F01",
+    "start_time": "2025-06-09T02:45:13.988071",
+    "end_time": "2025-06-09T02:57:17.546234",
+    "charged_kwh": 6.03,
+    "charge_mode": "快充",
+    "charge_fee": 7.24,
+    "service_fee": 2.0,
+    "total_fee": 9.24
+  },
+  "928188e2-7628-44c1-9ed9-2b50ef360d65": {
+    "bill_id": "928188e2-7628-44c1-9ed9-2b50ef360d65",
+    "car_id": "BUPT11",
+    "pile_id": "F01",
+    "start_time": "2025-06-09T02:45:13.988071",
+    "end_time": "2025-06-09T02:57:23.550961",
+    "charged_kwh": 6.08,
+    "charge_mode": "快充",
+    "charge_fee": 7.3,
+    "service_fee": 2.0,
+    "total_fee": 9.3
+  },
+  "f9e69058-d882-423c-9527-2b9bdd932ee2": {
+    "bill_id": "f9e69058-d882-423c-9527-2b9bdd932ee2",
+    "car_id": "BUPT11",
+    "pile_id": "F01",
+    "start_time": "2025-06-09T02:45:13.988071",
+    "end_time": "2025-06-09T02:57:31.557299",
+    "charged_kwh": 6.15,
+    "charge_mode": "快充",
+    "charge_fee": 7.38,
+    "service_fee": 2.0,
+    "total_fee": 9.38
+  },
+  "24290566-0ddc-4616-8659-d7c045f5c91c": {
+    "bill_id": "24290566-0ddc-4616-8659-d7c045f5c91c",
+    "car_id": "BUPT11",
+    "pile_id": "F01",
+    "start_time": "2025-06-09T02:45:13.988071",
+    "end_time": "2025-06-09T02:59:02.539337",
+    "charged_kwh": 6.9,
+    "charge_mode": "快充",
+    "charge_fee": 8.29,
+    "service_fee": 2.0,
+    "total_fee": 10.29
+  },
+  "28aa4d79-d6f2-4eb3-939c-5f5c8dab9b86": {
+    "bill_id": "28aa4d79-d6f2-4eb3-939c-5f5c8dab9b86",
+    "car_id": "BUPT11",
+    "pile_id": "F01",
+    "start_time": "2025-06-09T02:45:13.988071",
+    "end_time": "2025-06-09T02:59:04.544064",
+    "charged_kwh": 6.92,
+    "charge_mode": "快充",
+    "charge_fee": 8.31,
+    "service_fee": 2.0,
+    "total_fee": 10.31
+  },
+  "ba8256e4-a7e9-4664-8961-12c5860ccf8e": {
+    "bill_id": "ba8256e4-a7e9-4664-8961-12c5860ccf8e",
+    "car_id": "BUPT11",
+    "pile_id": "F01",
+    "start_time": "2025-06-09T02:45:13.988071",
+    "end_time": "2025-06-09T02:59:08.552180",
+    "charged_kwh": 6.95,
+    "charge_mode": "快充",
+    "charge_fee": 8.35,
+    "service_fee": 2.0,
+    "total_fee": 10.35
+  },
+  "f9495bfd-8aaf-42b8-8b61-34660b91eb1b": {
+    "bill_id": "f9495bfd-8aaf-42b8-8b61-34660b91eb1b",
+    "car_id": "BUPT11",
+    "pile_id": "F01",
+    "start_time": "2025-06-09T02:51:15.490499",
+    "end_time": "2025-06-09T03:01:53.654987",
+    "charged_kwh": 5.32,
+    "charge_mode": "快充",
+    "charge_fee": 6.38,
+    "service_fee": 2.0,
+    "total_fee": 8.38
+  }
+}
