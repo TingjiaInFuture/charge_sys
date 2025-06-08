@@ -337,6 +337,10 @@ class AdminClient(tk.Tk):
                     f"{pile['total_charged_kwh']:.2f}",
                     f"{pile['total_income']:.2f}"
                 ))
+            
+            # 显示刷新成功提示
+            messagebox.showinfo("成功", "充电桩数据已刷新")
+            
         except Exception as e:
             messagebox.showerror("错误", f"获取充电桩数据失败: {str(e)}")
 
