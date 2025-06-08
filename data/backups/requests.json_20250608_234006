@@ -1,0 +1,47 @@
+{
+  "1234": {
+    "car_id": "1234",
+    "request_mode": "快充",
+    "request_amount_kwh": 20.0,
+    "request_time": "2025-06-08T19:23:29.756959",
+    "state": "充电中",
+    "pile_id": "F01",
+    "queue_number": "F001"
+  },
+  "BUPT11": {
+    "car_id": "BUPT11",
+    "request_mode": "快充",
+    "request_amount_kwh": 2.0,
+    "request_time": "2025-06-08T23:09:06.493673",
+    "state": "充电中",
+    "pile_id": "F02",
+    "queue_number": "F002"
+  },
+  "BUPT12": {
+    "car_id": "BUPT12",
+    "request_mode": "快充",
+    "request_amount_kwh": 10.0,
+    "request_time": "2025-06-08T23:16:53.901339",
+    "state": "充电中",
+    "pile_id": "F01",
+    "queue_number": "F001"
+  },
+  "BUPT13": {
+    "car_id": "BUPT13",
+    "request_mode": "快充",
+    "request_amount_kwh": 5.0,
+    "request_time": "2025-06-08T23:20:17.325438",
+    "state": "充电中",
+    "pile_id": "F02",
+    "queue_number": "F002"
+  },
+  "BUPT14": {
+    "car_id": "BUPT14",
+    "request_mode": "快充",
+    "request_amount_kwh": 2.0,
+    "request_time": "2025-06-08T23:40:06.218861",
+    "state": "在主队列等待",
+    "pile_id": null,
+    "queue_number": "F001"
+  }
+}
