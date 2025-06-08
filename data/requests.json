@@ -6,5 +6,13 @@
     "queue_number": "",
     "request_time": "2025-06-08T17:15:18.554148",
     "status": "在主队列等待"
+  },
+  "WDNMD": {
+    "car_id": "WDNMD",
+    "request_mode": "快充",
+    "request_amount_kwh": 1.0,
+    "queue_number": "",
+    "request_time": "2025-06-08T21:46:26.591040",
+    "status": "在主队列等待"
   }
 }

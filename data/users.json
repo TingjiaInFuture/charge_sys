@@ -58,5 +58,15 @@
       "capacity_kwh": 50.0,
       "state": "空闲"
     }
+  },
+  "asdf": {
+    "user_id": "asdf",
+    "password_hash": "5d1b56c8bedcc727543f7bcb6322d5d8:323a5ac98f12eee8d77ff05a01e7f200babd2a5626d86bef3cda1029c91e0396",
+    "car": {
+      "car_id": "WDNMD",
+      "user_id": "asdf",
+      "capacity_kwh": 99.0,
+      "state": "空闲"
+    }
   }
 }

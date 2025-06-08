@@ -128,3 +128,4 @@ dmypy.json
 cython_debug/
 
 tempCodeRunnerFile.py
+data/
