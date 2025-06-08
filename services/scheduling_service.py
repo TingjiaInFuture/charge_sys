@@ -1,14 +1,15 @@
 # services/scheduling_service.py
-from repositories.repositories import PileRepository, QueueRepository
+from repositories.repositories import PileRepository, QueueRepository, RequestRepository
 from services.charging_service import ChargingService
-from utils.enums import WorkState
+from utils.enums import WorkState, CarState
 
 class SchedulingService:
     """A simple scheduler that runs periodically to assign cars to idle piles."""
-    def __init__(self, pile_repo: PileRepository, queue_repo: QueueRepository, charging_service: ChargingService):
+    def __init__(self, pile_repo: PileRepository, queue_repo: QueueRepository, charging_service: ChargingService, request_repo: RequestRepository):
         self._pile_repo = pile_repo
         self._queue_repo = queue_repo
         self._charging_service = charging_service
+        self._request_repo = request_repo
 
     def run_schedule_cycle(self):
         """
@@ -29,8 +30,13 @@ class SchedulingService:
             
             if next_car_request:
                 print(f"[Scheduler] Assigning Car {next_car_request.car_id} to Idle Pile {pile.pile_id}")
-                # In a more complex system, car would be sent to pile's local queue first.
-                # For simplicity, we directly start charging.
+                
+                # 更新请求状态为充电中
+                next_car_request.state = CarState.CHARGING
+                next_car_request.pile_id = pile.pile_id
+                self._request_repo.save(next_car_request.car_id, next_car_request)
+                
+                # 开始充电
                 self._charging_service.start_charging(pile, next_car_request)
             else:
-                print(f"[Scheduler] No cars waiting in {pile.pile_type.value} queue for Pile {pile.pile_id}.")
+                print(f"[Scheduler] No cars waiting in {pile.pile_type.value} queue for Pile {pile.pile_id}")

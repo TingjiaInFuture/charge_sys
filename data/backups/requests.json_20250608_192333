@@ -1,0 +1,11 @@
+{
+  "1234": {
+    "car_id": "1234",
+    "request_mode": "快充",
+    "request_amount_kwh": 20.0,
+    "request_time": "2025-06-08T19:23:29.756959",
+    "state": "在主队列等待",
+    "pile_id": null,
+    "queue_number": "F001"
+  }
+}

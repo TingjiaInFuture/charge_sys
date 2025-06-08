@@ -8,7 +8,8 @@ from repositories.repositories import (
     PileRepository, SessionRepository, BillRepository, RequestRepository, QueueRepository
 )
 from services.billing_service import BillingService
-from utils.enums import WorkState, CarState
+from services.queue_service import QueueService
+from utils.enums import WorkState, CarState, ChargeMode
 
 class ChargingService:
     def __init__(self, pile_repo: PileRepository, session_repo: SessionRepository, 
@@ -20,11 +21,40 @@ class ChargingService:
         self._request_repo = request_repo
         self._queue_repo = queue_repo
         self._billing_service = billing_service
+        self._queue_service = QueueService(queue_repo)
 
-    def create_charging_request(self, car_id: str, mode, amount) -> ChargingRequest:
-        request = ChargingRequest(car_id=car_id, request_mode=mode, request_amount_kwh=amount)
-        self._request_repo.save(request.car_id, request) # Using car_id as unique request ID for simplicity
-        self._queue_repo.add_to_queue(request)
+    def create_charging_request(self, car_id: str, mode: str, amount: float) -> ChargingRequest:
+        """创建充电请求
+        
+        Args:
+            car_id: 车辆ID
+            mode: 充电模式（"FAST" 或 "TRICKLE"）
+            amount: 充电量（kWh）
+            
+        Returns:
+            ChargingRequest: 创建的充电请求
+        """
+        # 转换充电模式字符串为枚举值
+        request_mode = ChargeMode.FAST if mode == "FAST" else ChargeMode.TRICKLE
+        
+        # 创建充电请求
+        request = ChargingRequest(
+            car_id=car_id,
+            request_mode=request_mode,
+            request_amount_kwh=amount,
+            state=CarState.WAITING_IN_MAIN_QUEUE  # 设置初始状态
+        )
+        
+        # 保存请求
+        self._request_repo.save(request.car_id, request)
+        
+        # 使用队列服务添加到队列并生成排队号码
+        queue_number = self._queue_service.add_to_queue(request)
+        
+        # 更新请求的排队号码
+        request.queue_number = queue_number
+        self._request_repo.save(request.car_id, request)
+        
         return request
 
     def start_charging(self, pile: ChargingPile, request: ChargingRequest):
@@ -47,27 +77,53 @@ class ChargingService:
         pile.current_charging_session = session
         self._pile_repo.save(pile.pile_id, pile) # Update pile state in repo
 
-    def end_charging(self, pile_id: str):
-        pile = self._pile_repo.find_by_id(pile_id)
-        if not pile or pile.state != WorkState.CHARGING or not pile.current_charging_session:
-            print(f"[ChargingService] Error: Cannot end charge for Pile {pile_id}.")
+    def end_charging(self, car_id: str):
+        """结束充电
+        
+        Args:
+            car_id: 车辆ID
+        """
+        # 查找当前充电会话
+        current_session = None
+        for session in self._session_repo.get_all():
+            if session.car_id == car_id:
+                current_session = session
+                break
+
+        if not current_session:
+            print(f"[ChargingService] Error: No active charging session found for Car {car_id}")
             return None
 
-        session = pile.current_charging_session
-        print(f"[ChargingService] Ending charge for Car {session.car_id} at Pile {pile_id}.")
+        # 获取充电桩
+        pile = self._pile_repo.find_by_id(current_session.pile_id)
+        if not pile:
+            print(f"[ChargingService] Error: Pile {current_session.pile_id} not found")
+            return None
 
-        bill = self._billing_service.calculate_and_create_bill(session, pile, datetime.now())
+        print(f"[ChargingService] Ending charge for Car {car_id} at Pile {pile.pile_id}")
+
+        # 计算账单
+        bill = self._billing_service.calculate_and_create_bill(current_session, pile, datetime.now())
         self._bill_repo.save(bill.bill_id, bill)
+        print(f"[ChargingService] Created bill for Car {car_id}")
         
-        request = self._request_repo.find_by_id(session.car_id)
-        request.state = CarState.AWAITING_PAYMENT
+        # 更新请求状态
+        request = self._request_repo.find_by_id(car_id)
+        if request:
+            request.state = CarState.CHARGING_COMPLETED  # 使用正确的状态名称
+            self._request_repo.save(request.car_id, request)
+            print(f"[ChargingService] Updated request state to CHARGING_COMPLETED for Car {car_id}")
 
-        # Reset pile
-        pile.state = WorkState.IDLE
-        pile.current_charging_session = None
-        self._session_repo.delete(session.session_id)
-        self._pile_repo.save(pile.pile_id, pile) # Update pile state
+        # 更新充电桩状态
+        pile.end_charging(pile.charged_kwh, bill.total_amount)
+        self._pile_repo.save(pile.pile_id, pile)
+        print(f"[ChargingService] Updated pile state to IDLE for Pile {pile.pile_id}")
         
+        # 删除会话
+        self._session_repo.delete(current_session.session_id)
+        print(f"[ChargingService] Deleted charging session for Car {car_id}")
+        
+        print(f"[ChargingService] Charging completed for Car {car_id}. Total amount: {bill.total_amount}")
         return bill
         
     def report_pile_failure(self, pile_id: str):

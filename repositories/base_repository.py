@@ -1,24 +1,88 @@
 # repositories/base_repository.py
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List, TypeVar, Generic
+from abc import ABC, abstractmethod
 
-class BaseRepository:
-    """A simple in-memory repository for demonstration."""
+T = TypeVar('T')
+
+class BaseRepository(Generic[T]):
+    """A base repository interface with type safety and error handling."""
     def __init__(self):
-        self._data: Dict[str, Any] = {}
+        self._data: Dict[str, T] = {}
 
-    def save(self, entity_id: str, entity: Any):
+    def save(self, entity_id: str, entity: T) -> bool:
+        """
+        Save an entity to the repository.
+        
+        Args:
+            entity_id: The unique identifier for the entity
+            entity: The entity to save
+            
+        Returns:
+            bool: True if save was successful, False if entity_id already exists
+        """
+        if entity_id in self._data:
+            return False
         print(f"[Repo] Saving {type(entity).__name__} with ID: {entity_id}")
         self._data[entity_id] = entity
+        return True
 
-    def find_by_id(self, entity_id: str) -> Optional[Any]:
+    def find_by_id(self, entity_id: str) -> Optional[T]:
+        """
+        Find an entity by its ID.
+        
+        Args:
+            entity_id: The unique identifier to search for
+            
+        Returns:
+            Optional[T]: The entity if found, None otherwise
+        """
         return self._data.get(entity_id)
 
-    def get_all(self):
+    def get_all(self) -> List[T]:
+        """
+        Get all entities in the repository.
+        
+        Returns:
+            List[T]: A list of all entities
+        """
         return list(self._data.values())
 
-    def delete(self, entity_id: str):
+    def delete(self, entity_id: str) -> bool:
+        """
+        Delete an entity by its ID.
+        
+        Args:
+            entity_id: The unique identifier to delete
+            
+        Returns:
+            bool: True if deletion was successful, False if entity not found
+        """
         if entity_id in self._data:
             del self._data[entity_id]
+            return True
+        return False
+
+    @abstractmethod
+    def persist(self) -> bool:
+        """
+        Persist the current state of the repository.
+        This method should be implemented by concrete repositories.
+        
+        Returns:
+            bool: True if persistence was successful
+        """
+        pass
+
+    @abstractmethod
+    def load(self) -> bool:
+        """
+        Load the repository state from persistent storage.
+        This method should be implemented by concrete repositories.
+        
+        Returns:
+            bool: True if loading was successful
+        """
+        pass
 
 # repositories/repositories.py
 from collections import deque
