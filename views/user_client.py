@@ -237,11 +237,11 @@ class UserClient(tk.Tk):
         # 清空主框架
         for widget in self.main_frame.winfo_children():
             widget.destroy()
-
+    
         # 创建详情框架
         details_frame = ttk.Frame(self.main_frame)
         details_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-
+    
         # 创建表格
         columns = ("状态", "时间", "充电桩", "充电量(kWh)", "时长(h)", "开始时间", "结束时间", "充电费用", "服务费用", "总费用")
         tree = ttk.Treeview(details_frame, columns=columns, show="headings", height=10)
@@ -263,53 +263,22 @@ class UserClient(tk.Tk):
         for col in columns:
             tree.heading(col, text=col)
             tree.column(col, width=column_widths[col], anchor="center")
-
+    
         # 添加滚动条
         scrollbar = ttk.Scrollbar(details_frame, orient=tk.VERTICAL, command=tree.yview)
         tree.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
+    
         try:
             # 获取充电详情
             response = self.network_client.send_request('get_charging_details', {
                 'car_id': self.car_id
             })
-
+    
             if response.get('status') == 'success':
                 data = response.get('data', {})
                 
-                # 显示当前请求
-                current_request = data.get('current_request')
-                if current_request:
-                    state_map = {
-                        "WAITING_IN_MAIN_QUEUE": "等待中",
-                        "WAITING_AT_PILE_QUEUE": "排队中",
-                        "CHARGING": "充电中",
-                        "CHARGING_COMPLETED": "已完成"
-                    }
-                    state = state_map.get(current_request['state'], current_request['state'])
-                    request_time = datetime.fromisoformat(current_request['request_time'])
-                    
-                    # 计算当前充电时长（如果正在充电）
-                    duration = ''
-                    if current_request['state'] == "CHARGING":
-                        start_time = datetime.fromisoformat(current_request['request_time'])
-                        duration = f"{(datetime.now() - start_time).total_seconds() / 3600:.2f}"
-                    
-                    tree.insert("", 0, values=(
-                        state,
-                        request_time.strftime("%Y-%m-%d %H:%M:%S"),
-                        current_request.get('pile_id', '等待分配'),
-                        f"{current_request.get('request_amount_kwh', 0):.2f}",
-                        duration,
-                        request_time.strftime("%Y-%m-%d %H:%M:%S"),
-                        '',
-                        '',
-                        '',
-                        ''
-                    ))
-
                 # 显示当前会话
                 current_session = data.get('current_session')
                 if current_session:
@@ -327,7 +296,7 @@ class UserClient(tk.Tk):
                         '',
                         ''
                     ))
-
+    
                 # 显示历史账单
                 bills = data.get('bills', [])
                 for bill in bills:
@@ -346,14 +315,14 @@ class UserClient(tk.Tk):
                         f"¥{bill['service_fee']:.2f}",
                         f"¥{bill['total_fee']:.2f}"
                     ))
-
-                if not (current_request or current_session or bills):
+    
+                if not (current_session or bills):
                     ttk.Label(details_frame, text="暂无充电记录").pack(pady=20)
             else:
                 ttk.Label(details_frame, text=f"获取充电详情失败: {response.get('message', '未知错误')}").pack(pady=20)
         except Exception as e:
             ttk.Label(details_frame, text=f"获取充电详情时发生错误: {str(e)}").pack(pady=20)
-
+    
         # 添加返回按钮
         ttk.Button(self.main_frame, text="返回", command=self.show_main_menu).pack(pady=10)
     

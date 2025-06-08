@@ -369,11 +369,15 @@ class ChargeServer:
 
             # 获取当前充电会话
             current_session = None
-            if current_request and current_request.state == CarState.CHARGING:
-                for session in self.session_repo.get_all():
-                    if session.car_id == car_id:
-                        current_session = session
-                        break
+            for session in self.session_repo.get_all():
+                if session.car_id == car_id:
+                    current_session = session
+                    break
+            
+            # 如果找到了充电会话但请求状态不是充电中，说明状态不一致，需要清理
+            if current_session and (not current_request or current_request.state != CarState.CHARGING):
+                self.session_repo.delete(current_session.session_id)
+                current_session = None
             print(f"[Server] 当前充电会话: {current_session.to_dict() if current_session else None}")
 
             # 获取历史账单

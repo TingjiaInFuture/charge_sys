@@ -58,5 +58,55 @@
       "capacity_kwh": 50.0,
       "state": "空闲"
     }
+  },
+  "user11": {
+    "user_id": "user11",
+    "password_hash": "91197a4313cee01c33ee1b1cf5da2f6a:481e2d34597c4ee3bba57987acca56ffbd49cf6ae3c4fb4aa187d39519aed36e",
+    "car": {
+      "car_id": "BUPT11",
+      "user_id": "user11",
+      "capacity_kwh": 80.0,
+      "state": "空闲"
+    }
+  },
+  "user12": {
+    "user_id": "user12",
+    "password_hash": "4d63e88c4f81382629cdf23d0015919c:070f1bc3d3a247b96b1d89f14d65e6e23624fc8022469227b33febdc44686577",
+    "car": {
+      "car_id": "BUPT12",
+      "user_id": "user12",
+      "capacity_kwh": 80.0,
+      "state": "空闲"
+    }
+  },
+  "user13": {
+    "user_id": "user13",
+    "password_hash": "9f1a5947a6dc1d3d92ae07354b802f1f:9d7544601c11edb24ef593b7d7a7f4b85d0740da98485cf691bb4112fabb993c",
+    "car": {
+      "car_id": "BUPT13",
+      "user_id": "user13",
+      "capacity_kwh": 80.0,
+      "state": "空闲"
+    }
+  },
+  "user14": {
+    "user_id": "user14",
+    "password_hash": "9f3ce34ae089d1e5e5409e4a95c97c5a:28cb4dd5b409944ce2655d53ddccf122f8e5ab580090c86a2c58b009819d0a58",
+    "car": {
+      "car_id": "BUPT14",
+      "user_id": "user14",
+      "capacity_kwh": 80.0,
+      "state": "空闲"
+    }
+  },
+  "user16": {
+    "user_id": "user16",
+    "password_hash": "bb78039fbdcdb9900f5aada1ccd3d885:97ca24c834ad187692890cc104269c9f01ddba2e84ca6fd7d4820742a3b82bd4",
+    "car": {
+      "car_id": "BUPT16",
+      "user_id": "user16",
+      "capacity_kwh": 80.0,
+      "state": "空闲"
+    }
   }
 }
