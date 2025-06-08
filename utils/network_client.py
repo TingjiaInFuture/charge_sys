@@ -2,7 +2,7 @@ import socket
 import json
 import time
 import threading
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from functools import wraps
 
 def retry_on_failure(max_retries=3, delay=1):
@@ -178,3 +178,36 @@ class NetworkClient:
         except Exception as e:
             print(f"获取充电详单失败: {str(e)}")
             return None
+    
+    def get_all_piles(self) -> List[Dict[str, Any]]:
+        """获取所有充电桩数据"""
+        response = self.send_request('get_all_piles', {})
+        if response and response.get('status') == 'success':
+            return response.get('data', [])
+        return []
+    
+    def toggle_pile_state(self, pile_id: str, start: bool) -> bool:
+        """切换充电桩状态"""
+        response = self.send_request('toggle_pile_state', {
+            'pile_id': pile_id,
+            'start': start
+        })
+        return response and response.get('status') == 'success'
+    
+    def get_pile_queue(self, pile_id: str) -> List[Dict[str, Any]]:
+        """获取充电桩排队信息"""
+        response = self.send_request('get_pile_queue', {
+            'pile_id': pile_id
+        })
+        if response and response.get('status') == 'success':
+            return response.get('data', [])
+        return []
+    
+    def get_reports(self, time_range: str) -> List[Dict[str, Any]]:
+        """获取报表数据"""
+        response = self.send_request('get_reports', {
+            'time_range': time_range
+        })
+        if response and response.get('status') == 'success':
+            return response.get('data', [])
+        return []

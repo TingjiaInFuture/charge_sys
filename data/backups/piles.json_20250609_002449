@@ -17,14 +17,15 @@
     "pile_id": "F02",
     "pile_type": "快充",
     "power_kw": 30.0,
-    "state": "离线",
+    "state": "空闲",
     "current_car_id": null,
     "start_time": null,
     "charged_kwh": 0.0,
     "total_charged_kwh": 0.0,
     "total_charging_time": 0.0,
     "total_charging_count": 0,
-    "total_income": 0.0
+    "total_income": 0.0,
+    "pile_class": "FastChargingPile"
   },
   "T01": {
     "pile_id": "T01",

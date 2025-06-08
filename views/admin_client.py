@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 from datetime import datetime, timedelta
 from models.charging_pile import ChargingPile
 from utils.enums import WorkState, ChargeMode
+from utils.network_client import NetworkClient
 
 class AdminClient(tk.Tk):
     def __init__(self):
@@ -10,6 +11,9 @@ class AdminClient(tk.Tk):
         
         self.title("充电站管理员客户端")
         self.geometry("1000x700")
+        
+        # 初始化网络客户端
+        self.network_client = NetworkClient()
         
         # 创建主框架
         self.main_frame = ttk.Frame(self)
@@ -56,13 +60,39 @@ class AdminClient(tk.Tk):
         """显示充电桩管理界面"""
         self.clear_main_frame()
         
-        # 管理框架
-        management_frame = ttk.LabelFrame(self.main_frame, text="充电桩管理", padding=20)
-        management_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        # 创建标题
+        title_label = ttk.Label(self.main_frame, text="充电桩管理", font=("Arial", 16, "bold"))
+        title_label.pack(pady=20)
+        
+        # 创建控制面板
+        control_frame = ttk.Frame(self.main_frame)
+        control_frame.pack(fill=tk.X, padx=20, pady=10)
+        
+        # 左侧控制区
+        left_control = ttk.Frame(control_frame)
+        left_control.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        
+        # 充电桩选择
+        ttk.Label(left_control, text="选择充电桩:").pack(side=tk.LEFT, padx=5)
+        self.pile_id_var = tk.StringVar()
+        self.pile_combo = ttk.Combobox(left_control, textvariable=self.pile_id_var, width=10)
+        self.pile_combo.pack(side=tk.LEFT, padx=5)
+        
+        # 操作按钮
+        action_frame = ttk.Frame(left_control)
+        action_frame.pack(side=tk.LEFT, padx=20)
+        ttk.Button(action_frame, text="启动充电桩", command=self.start_pile).pack(side=tk.LEFT, padx=5)
+        ttk.Button(action_frame, text="关闭充电桩", command=self.stop_pile).pack(side=tk.LEFT, padx=5)
+        ttk.Button(action_frame, text="查看排队信息", command=self.show_queue_info).pack(side=tk.LEFT, padx=5)
+        
+        # 右侧控制区
+        right_control = ttk.Frame(control_frame)
+        right_control.pack(side=tk.RIGHT)
+        ttk.Button(right_control, text="刷新数据", command=self.refresh_pile_data).pack(side=tk.RIGHT)
         
         # 创建表格
-        columns = ("充电桩ID", "类型", "状态", "累计充电次数", "累计充电时长", "累计充电量")
-        self.pile_tree = ttk.Treeview(management_frame, columns=columns, show="headings")
+        columns = ("充电桩ID", "状态", "类型", "累计充电次数", "累计充电时长(小时)", "累计充电量(度)", "累计收入(元)")
+        self.pile_tree = ttk.Treeview(self.main_frame, columns=columns, show="headings")
         
         # 设置列标题
         for col in columns:
@@ -70,30 +100,15 @@ class AdminClient(tk.Tk):
             self.pile_tree.column(col, width=100)
         
         # 添加滚动条
-        scrollbar = ttk.Scrollbar(management_frame, orient=tk.VERTICAL, command=self.pile_tree.yview)
+        scrollbar = ttk.Scrollbar(self.main_frame, orient=tk.VERTICAL, command=self.pile_tree.yview)
         self.pile_tree.configure(yscrollcommand=scrollbar.set)
         
         # 布局
-        self.pile_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.pile_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=20, pady=10)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y, pady=10)
         
-        # 控制按钮框架
-        control_frame = ttk.Frame(management_frame)
-        control_frame.pack(fill=tk.X, pady=10)
-        
-        # 选择充电桩
-        ttk.Label(control_frame, text="选择充电桩:").pack(side=tk.LEFT, padx=5)
-        self.pile_id_var = tk.StringVar()
-        self.pile_id_combo = ttk.Combobox(control_frame, textvariable=self.pile_id_var)
-        self.pile_id_combo.pack(side=tk.LEFT, padx=5)
-        
-        # 操作按钮
-        ttk.Button(control_frame, text="启动", command=lambda: self.toggle_pile_state(True)).pack(side=tk.LEFT, padx=5)
-        ttk.Button(control_frame, text="关闭", command=lambda: self.toggle_pile_state(False)).pack(side=tk.LEFT, padx=5)
-        ttk.Button(control_frame, text="查看排队车辆", command=self.show_queue_info).pack(side=tk.LEFT, padx=5)
-        
-        # 返回按钮
-        ttk.Button(self.main_frame, text="返回主菜单", command=self.show_main_menu).pack(pady=10)
+        # 加载充电桩数据
+        self.refresh_pile_data()
     
     def show_reports(self):
         """显示报表界面"""
@@ -144,29 +159,79 @@ class AdminClient(tk.Tk):
             messagebox.showerror("错误", "请选择充电桩")
             return
         
-        # 创建新窗口
-        queue_window = tk.Toplevel(self)
-        queue_window.title(f"充电桩 {pile_id} 排队信息")
-        queue_window.geometry("600x400")
-        
-        # 创建表格
-        columns = ("用户ID", "车辆电池总容量", "请求充电量", "排队时长")
-        queue_tree = ttk.Treeview(queue_window, columns=columns, show="headings")
-        
-        # 设置列标题
-        for col in columns:
-            queue_tree.heading(col, text=col)
-            queue_tree.column(col, width=100)
-        
-        # 添加滚动条
-        scrollbar = ttk.Scrollbar(queue_window, orient=tk.VERTICAL, command=queue_tree.yview)
-        queue_tree.configure(yscrollcommand=scrollbar.set)
-        
-        # 布局
-        queue_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        
-        # TODO: 实现实际的排队信息获取逻辑
+        try:
+            # 获取排队信息
+            queue_data = self.network_client.get_pile_queue(pile_id)
+            
+            # 创建新窗口
+            queue_window = tk.Toplevel(self)
+            queue_window.title(f"充电桩 {pile_id} 排队信息")
+            queue_window.geometry("800x500")
+            
+            # 创建表格
+            columns = ("用户ID", "车辆电池总容量(度)", "请求充电量(度)", "排队时长(小时)")
+            queue_tree = ttk.Treeview(queue_window, columns=columns, show="headings")
+            
+            # 设置列标题
+            for col in columns:
+                queue_tree.heading(col, text=col)
+                queue_tree.column(col, width=150)
+            
+            # 添加滚动条
+            scrollbar = ttk.Scrollbar(queue_window, orient=tk.VERTICAL, command=queue_tree.yview)
+            queue_tree.configure(yscrollcommand=scrollbar.set)
+            
+            # 布局
+            queue_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y, pady=10)
+            
+            # 填充数据
+            for vehicle in queue_data:
+                queue_tree.insert('', 'end', values=(
+                    vehicle['user_id'],
+                    f"{vehicle['battery_capacity']:.2f}",
+                    f"{vehicle['request_amount']:.2f}",
+                    f"{vehicle['waiting_time']:.2f}"
+                ))
+            
+            # 添加刷新按钮
+            refresh_frame = ttk.Frame(queue_window)
+            refresh_frame.pack(fill=tk.X, padx=10, pady=5)
+            ttk.Button(refresh_frame, text="刷新数据", 
+                      command=lambda: self.refresh_queue_info(queue_tree, pile_id)).pack(side=tk.RIGHT)
+            
+            # 如果没有排队车辆，显示提示信息
+            if not queue_data:
+                queue_tree.insert('', 'end', values=("暂无排队车辆", "", "", ""))
+                
+        except Exception as e:
+            messagebox.showerror("错误", f"获取排队信息失败: {str(e)}")
+    
+    def refresh_queue_info(self, queue_tree, pile_id):
+        """刷新排队信息"""
+        try:
+            # 清空现有数据
+            for item in queue_tree.get_children():
+                queue_tree.delete(item)
+            
+            # 获取新的排队信息
+            queue_data = self.network_client.get_pile_queue(pile_id)
+            
+            # 填充数据
+            for vehicle in queue_data:
+                queue_tree.insert('', 'end', values=(
+                    vehicle['user_id'],
+                    f"{vehicle['battery_capacity']:.2f}",
+                    f"{vehicle['request_amount']:.2f}",
+                    f"{vehicle['waiting_time']:.2f}"
+                ))
+            
+            # 如果没有排队车辆，显示提示信息
+            if not queue_data:
+                queue_tree.insert('', 'end', values=("暂无排队车辆", "", "", ""))
+                
+        except Exception as e:
+            messagebox.showerror("错误", f"刷新排队信息失败: {str(e)}")
     
     def clear_main_frame(self):
         """清除主框架中的所有组件"""
@@ -184,16 +249,39 @@ class AdminClient(tk.Tk):
         else:
             messagebox.showerror("错误", "请输入用户名和密码")
     
-    def toggle_pile_state(self, start: bool):
-        """切换充电桩状态"""
+    def start_pile(self):
+        """启动充电桩"""
         pile_id = self.pile_id_var.get()
         if not pile_id:
             messagebox.showerror("错误", "请选择充电桩")
             return
-        
-        # TODO: 实现实际的充电桩状态切换逻辑
-        state = "启动" if start else "关闭"
-        messagebox.showinfo("成功", f"充电桩 {pile_id} 已{state}")
+            
+        try:
+            # 调用网络客户端启动充电桩
+            if self.network_client.toggle_pile_state(pile_id, True):
+                messagebox.showinfo("成功", f"充电桩 {pile_id} 已启动")
+                self.refresh_pile_data()  # 刷新显示
+            else:
+                messagebox.showerror("错误", f"启动充电桩 {pile_id} 失败")
+        except Exception as e:
+            messagebox.showerror("错误", f"启动充电桩失败: {str(e)}")
+    
+    def stop_pile(self):
+        """关闭充电桩"""
+        pile_id = self.pile_id_var.get()
+        if not pile_id:
+            messagebox.showerror("错误", "请选择充电桩")
+            return
+            
+        try:
+            # 调用网络客户端关闭充电桩
+            if self.network_client.toggle_pile_state(pile_id, False):
+                messagebox.showinfo("成功", f"充电桩 {pile_id} 已关闭")
+                self.refresh_pile_data()  # 刷新显示
+            else:
+                messagebox.showerror("错误", f"关闭充电桩 {pile_id} 失败")
+        except Exception as e:
+            messagebox.showerror("错误", f"关闭充电桩失败: {str(e)}")
     
     def refresh_report(self):
         """刷新报表数据"""
@@ -203,6 +291,39 @@ class AdminClient(tk.Tk):
     def logout(self):
         """退出登录"""
         self.show_login_frame()
+    
+    def refresh_pile_data(self):
+        """刷新充电桩数据"""
+        try:
+            # 清空现有数据
+            for item in self.pile_tree.get_children():
+                self.pile_tree.delete(item)
+            
+            # 获取充电桩数据
+            piles = self.network_client.get_all_piles()
+            if not piles:
+                messagebox.showwarning("警告", "没有找到充电桩数据")
+                return
+            
+            # 更新下拉框选项
+            pile_ids = [pile['pile_id'] for pile in piles]
+            self.pile_combo['values'] = pile_ids
+            if pile_ids and not self.pile_id_var.get():
+                self.pile_id_var.set(pile_ids[0])
+            
+            # 填充表格数据
+            for pile in piles:
+                self.pile_tree.insert('', 'end', values=(
+                    pile['pile_id'],
+                    pile['state'],
+                    pile['pile_type'],
+                    pile['total_charging_count'],
+                    f"{pile['total_charging_time']:.2f}",
+                    f"{pile['total_charged_kwh']:.2f}",
+                    f"{pile['total_income']:.2f}"
+                ))
+        except Exception as e:
+            messagebox.showerror("错误", f"获取充电桩数据失败: {str(e)}")
 
 if __name__ == "__main__":
     app = AdminClient()

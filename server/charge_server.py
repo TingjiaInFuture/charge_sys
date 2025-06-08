@@ -216,6 +216,14 @@ class ChargeServer:
                 return self._handle_end_charging(data)
             elif action == 'get_charging_details':
                 return self._handle_get_charging_details(data)
+            elif action == 'get_all_piles':
+                return self._handle_get_all_piles()
+            elif action == 'toggle_pile_state':
+                return self._handle_toggle_pile_state(data)
+            elif action == 'get_pile_queue':
+                return self._handle_get_pile_queue(data)
+            elif action == 'get_reports':
+                return self._handle_get_reports(data)
             else:
                 return {'status': 'error', 'message': '未知的操作类型'}
         except Exception as e:
@@ -405,6 +413,76 @@ class ChargeServer:
             error_msg = f"获取充电详情失败: {str(e)}"
             print(f"[Server] {error_msg}")
             return {'status': 'error', 'message': error_msg}
+    
+    def _handle_get_all_piles(self) -> Dict[str, Any]:
+        """处理获取所有充电桩数据的请求"""
+        try:
+            piles = self.pile_repo.get_all()
+            return {
+                'status': 'success',
+                'data': [pile.to_dict() for pile in piles]
+            }
+        except Exception as e:
+            return {'status': 'error', 'message': str(e)}
+    
+    def _handle_toggle_pile_state(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """处理切换充电桩状态的请求"""
+        try:
+            pile_id = data.get('pile_id')
+            start = data.get('start', True)
+            
+            pile = self.pile_repo.get(pile_id)
+            if not pile:
+                return {'status': 'error', 'message': '充电桩不存在'}
+            
+            if start:
+                pile.set_state(WorkState.IDLE)
+            else:
+                pile.set_state(WorkState.OFFLINE)
+            
+            self.pile_repo.save(pile_id, pile)
+            return {'status': 'success', 'message': '状态更新成功'}
+        except Exception as e:
+            return {'status': 'error', 'message': str(e)}
+    
+    def _handle_get_pile_queue(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """处理获取充电桩排队信息的请求"""
+        try:
+            pile_id = data.get('pile_id')
+            pile = self.pile_repo.get(pile_id)
+            if not pile:
+                return {'status': 'error', 'message': '充电桩不存在'}
+            
+            queue = self.queue_service.get_queue_status(pile.pile_type)
+            queue_data = []
+            
+            for request in queue:
+                if request.pile_id == pile_id:
+                    queue_data.append({
+                        'user_id': request.car_id,
+                        'battery_capacity': request.request_amount_kwh,
+                        'request_amount': request.request_amount_kwh,
+                        'waiting_time': (datetime.now() - request.request_time).total_seconds() / 3600
+                    })
+            
+            return {
+                'status': 'success',
+                'data': queue_data
+            }
+        except Exception as e:
+            return {'status': 'error', 'message': str(e)}
+    
+    def _handle_get_reports(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """处理获取报表数据的请求"""
+        try:
+            time_range = data.get('time_range', 'day')
+            # TODO: 实现实际的报表数据生成逻辑
+            return {
+                'status': 'success',
+                'data': []
+            }
+        except Exception as e:
+            return {'status': 'error', 'message': str(e)}
 
 if __name__ == '__main__':
     server = ChargeServer()
