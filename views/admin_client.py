@@ -60,13 +60,17 @@ class AdminClient(tk.Tk):
         """显示充电桩管理界面"""
         self.clear_main_frame()
         
+        # 创建主容器
+        main_container = ttk.Frame(self.main_frame)
+        main_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        
         # 创建标题
-        title_label = ttk.Label(self.main_frame, text="充电桩管理", font=("Arial", 16, "bold"))
+        title_label = ttk.Label(main_container, text="充电桩管理", font=("Arial", 16, "bold"))
         title_label.pack(pady=20)
         
         # 创建控制面板
-        control_frame = ttk.Frame(self.main_frame)
-        control_frame.pack(fill=tk.X, padx=20, pady=10)
+        control_frame = ttk.Frame(main_container)
+        control_frame.pack(fill=tk.X, pady=10)
         
         # 左侧控制区
         left_control = ttk.Frame(control_frame)
@@ -90,9 +94,13 @@ class AdminClient(tk.Tk):
         right_control.pack(side=tk.RIGHT)
         ttk.Button(right_control, text="刷新数据", command=self.refresh_pile_data).pack(side=tk.RIGHT)
         
+        # 创建表格容器
+        table_frame = ttk.Frame(main_container)
+        table_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        
         # 创建表格
         columns = ("充电桩ID", "状态", "类型", "累计充电次数", "累计充电时长(小时)", "累计充电量(度)", "累计收入(元)")
-        self.pile_tree = ttk.Treeview(self.main_frame, columns=columns, show="headings")
+        self.pile_tree = ttk.Treeview(table_frame, columns=columns, show="headings")
         
         # 设置列标题
         for col in columns:
@@ -100,12 +108,19 @@ class AdminClient(tk.Tk):
             self.pile_tree.column(col, width=100)
         
         # 添加滚动条
-        scrollbar = ttk.Scrollbar(self.main_frame, orient=tk.VERTICAL, command=self.pile_tree.yview)
+        scrollbar = ttk.Scrollbar(table_frame, orient=tk.VERTICAL, command=self.pile_tree.yview)
         self.pile_tree.configure(yscrollcommand=scrollbar.set)
         
-        # 布局
-        self.pile_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=20, pady=10)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y, pady=10)
+        # 布局表格和滚动条
+        self.pile_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # 创建底部按钮容器
+        bottom_frame = ttk.Frame(main_container)
+        bottom_frame.pack(fill=tk.X, pady=20)
+        
+        # 添加返回按钮
+        ttk.Button(bottom_frame, text="返回主菜单", command=self.show_main_menu).pack(side=tk.LEFT, padx=10)
         
         # 加载充电桩数据
         self.refresh_pile_data()
