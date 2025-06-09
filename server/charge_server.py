@@ -224,6 +224,8 @@ class ChargeServer:
                 return self._handle_get_pile_queue(data)
             elif action == 'get_reports':
                 return self._handle_get_reports(data)
+            elif action == 'get_current_request':
+                return self._handle_get_current_request(data)
             else:
                 return {'status': 'error', 'message': '未知的操作类型'}
         except Exception as e:
@@ -406,6 +408,16 @@ class ChargeServer:
                 }
             }
 
+            # 如果当前请求存在但没有排队号码，尝试从队列中获取
+            if current_request and not current_request.queue_number:
+                queue = self.queue_service.get_queue_status(current_request.request_mode)
+                for request in queue:
+                    if request.car_id == car_id:
+                        current_request.queue_number = request.queue_number
+                        self.request_repo.save(car_id, current_request)
+                        response_data['data']['current_request'] = current_request.to_dict()
+                        break
+
             print(f"[Server] 充电详情获取成功")
             return response_data
 
@@ -483,6 +495,56 @@ class ChargeServer:
             }
         except Exception as e:
             return {'status': 'error', 'message': str(e)}
+
+    def _handle_get_current_request(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """处理获取当前充电请求的请求"""
+        try:
+            car_id = data.get('car_id')
+            if not car_id:
+                return {'status': 'error', 'message': '缺少车辆ID'}
+
+            print(f"[Server] 正在获取车辆 {car_id} 的当前请求...")
+
+            # 获取当前充电请求
+            current_request = self.request_repo.get(car_id)
+            if not current_request:
+                return {
+                    'status': 'success',
+                    'data': None
+                }
+
+            # 如果请求已完成且没有当前会话，则清除当前请求
+            if current_request.state == CarState.CHARGING_COMPLETED:
+                current_session = None
+                for session in self.session_repo.get_all():
+                    if session.car_id == car_id:
+                        current_session = session
+                        break
+                
+                if not current_session:
+                    return {
+                        'status': 'success',
+                        'data': None
+                    }
+
+            # 如果请求存在但没有排队号码，尝试从队列中获取
+            if not current_request.queue_number:
+                queue = self.queue_service.get_queue_status(current_request.request_mode)
+                for request in queue:
+                    if request.car_id == car_id:
+                        current_request.queue_number = request.queue_number
+                        self.request_repo.save(car_id, current_request)
+                        break
+
+            return {
+                'status': 'success',
+                'data': current_request.to_dict()
+            }
+
+        except Exception as e:
+            error_msg = f"获取当前请求失败: {str(e)}"
+            print(f"[Server] {error_msg}")
+            return {'status': 'error', 'message': error_msg}
 
 if __name__ == '__main__':
     server = ChargeServer()
