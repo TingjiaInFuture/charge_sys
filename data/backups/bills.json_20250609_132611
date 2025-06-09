@@ -1,0 +1,14 @@
+{
+  "dd1d3ffd-3960-428c-803c-ad454db9030c": {
+    "bill_id": "dd1d3ffd-3960-428c-803c-ad454db9030c",
+    "car_id": "BUPT11",
+    "pile_id": "F01",
+    "start_time": "2025-06-09T13:20:55.537623",
+    "end_time": "2025-06-09T13:21:25.505043",
+    "charged_kwh": 0.25,
+    "charge_mode": "快充",
+    "charge_fee": 0.3,
+    "service_fee": 2.0,
+    "total_fee": 2.3
+  }
+}

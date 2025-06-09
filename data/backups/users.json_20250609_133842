@@ -1,0 +1,22 @@
+{
+  "user11": {
+    "user_id": "user11",
+    "password_hash": "3f3ef044aed15f65f8fd33d43a56921f:9ce08a8d9f367ec506749ab063cecff2e87bab1750a09f961063938535195696",
+    "car": {
+      "car_id": "BUPT11",
+      "user_id": "user11",
+      "capacity_kwh": 80.0,
+      "state": "空闲"
+    }
+  },
+  "user12": {
+    "user_id": "user12",
+    "password_hash": "cba68437b6c29bb4a4bb8c3ab49db449:02a63ee2a4a088c8a2c79694d93af21a20d6e83639535622cd4ab52faea41877",
+    "car": {
+      "car_id": "BUPT12",
+      "user_id": "user12",
+      "capacity_kwh": 80.0,
+      "state": "空闲"
+    }
+  }
+}

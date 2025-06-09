@@ -1,0 +1,11 @@
+{
+  "BUPT11": {
+    "car_id": "BUPT11",
+    "request_mode": "快充",
+    "request_amount_kwh": 1.0,
+    "request_time": "2025-06-09T13:37:17.740673",
+    "state": "在主队列等待",
+    "pile_id": null,
+    "queue_number": null
+  }
+}

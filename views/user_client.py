@@ -349,14 +349,15 @@ class UserClient(tk.Tk):
     def show_queue_number(self):
         """显示本车排队号码"""
         try:
-            # 获取充电详情
-            response = self.network_client.get_charging_details(self.car_id)
-            if response and response.get('status') == 'success':
-                data = response.get('data', {})
-                current_request = data.get('current_request')
-                
-                if current_request and current_request.get('queue_number'):
-                    messagebox.showinfo("排队号码", f"您的排队号码是：{current_request['queue_number']}")
+            # 获取当前请求
+            request = self.network_client.send_request('get_current_request', {
+                'car_id': self.car_id
+            })
+            
+            if request and request.get('status') == 'success':
+                data = request.get('data', {})
+                if data and data.get('queue_number'):
+                    messagebox.showinfo("排队号码", f"您的排队号码是：{data['queue_number']}")
                 else:
                     messagebox.showinfo("提示", "您当前没有排队中的充电请求")
             else:
@@ -367,20 +368,21 @@ class UserClient(tk.Tk):
     def show_waiting_count(self):
         """显示本充电模式下前车等待数量"""
         try:
-            # 获取充电详情
-            response = self.network_client.get_charging_details(self.car_id)
-            if response and response.get('status') == 'success':
-                data = response.get('data', {})
-                current_request = data.get('current_request')
-                
-                if current_request:
+            # 获取当前请求
+            request = self.network_client.send_request('get_current_request', {
+                'car_id': self.car_id
+            })
+            
+            if request and request.get('status') == 'success':
+                data = request.get('data', {})
+                if data and data.get('request_mode'):
                     # 获取所有充电桩
                     piles = self.network_client.get_all_piles()
                     waiting_count = 0
                     
                     # 统计同模式下等待的车辆数量
                     for pile in piles:
-                        if pile['pile_type'] == current_request['request_mode']:
+                        if pile['pile_type'] == data['request_mode']:
                             queue_data = self.network_client.get_pile_queue(pile['pile_id'])
                             waiting_count += len(queue_data)
                     
